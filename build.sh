@@ -16,9 +16,9 @@ PLATFORM="linux/amd64"
 # TAG=jdk-11 bats test
 
 # jdk-17
-docker build --pull -t mattbrumpton/maven-chrome:jdk-17 jdk-17 --platform "${PLATFORM}"
+docker build --pull -t maven-chrome:jdk-17 jdk-17 --platform "${PLATFORM}"
 TAG=jdk-17 bats test
 
 # jdk-20
-docker build --pull -t mattbrumpton/maven-chrome:jdk-20 -t mattbrumpton/maven-chrome jdk-20 --platform "${PLATFORM}"
+docker build --pull -t maven-chrome:jdk-20 -t maven-chrome jdk-20 --platform "${PLATFORM}"
 TAG=jdk-20 bats test

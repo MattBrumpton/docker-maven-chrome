@@ -5,7 +5,7 @@ PLATFORM="linux/amd64"
 # TAG="jdk-20"
 
 setup() {
-	DOCKER_IMAGE=mattbrumpton/maven-chrome:${TAG:-latest}
+	DOCKER_IMAGE=maven-chrome:${TAG:-latest}
 }
 
 @test "Can run browser test" {
