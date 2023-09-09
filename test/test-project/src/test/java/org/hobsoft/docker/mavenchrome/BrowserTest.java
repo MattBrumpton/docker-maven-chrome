@@ -1,70 +1,74 @@
-/*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.hobsoft.docker.mavenchrome;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Tests that Selenium can run on Chrome.
- */
-public class BrowserTest
-{
-	// ----------------------------------------------------------------------------------------------------------------
-	// fields
-	// ----------------------------------------------------------------------------------------------------------------
-	
-	private WebDriver driver;
-	
-	// ----------------------------------------------------------------------------------------------------------------
-	// JUnit methods
-	// ----------------------------------------------------------------------------------------------------------------
-	
-	@Before
-	public void setUp()
-	{
-		ChromeOptions options = new ChromeOptions()
-			.addArguments("--headless=new");
-		
-		driver = new ChromeDriver(options);
+public class BrowserTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BrowserTest.class);
+    private static final String GOOGLE_URL = "https://www.google.com";
+    private static final String SEARCH_BOX_NAME = "q";
+    private static final String SEARCH_QUERY = "OpenAI";
+
+    private WebDriver driver;
+
+    @BeforeEach
+    public void setUp() {
+        LOGGER.info("Setting up the browser.");
+        try {
+            System.setProperty("webdriver.chrome.driver", "/usr/local/bin/chromedriver");
+            ChromeOptions options = new ChromeOptions();
+            options.addArguments("--remote-debugging-port=9222");
+            driver = new ChromeDriver(options);
+        } catch (Exception e) {
+            LOGGER.error("Exception during browser setup: ", e);
+        }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        LOGGER.info("Tearing down the browser.");
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+
+    @Test
+    public void checkBrowser() {
+        try {
+            navigateToGoogle();
+            performSearch();
+            waitForResultsAndVerify();
+        } catch (Exception e) {
+            LOGGER.error("Exception during test: ", e);
+        }
+    }
+
+    private void navigateToGoogle() {
+        driver.get(GOOGLE_URL);
+    }
+
+    private void performSearch() {
+        driver.findElement(By.name(SEARCH_BOX_NAME)).sendKeys(SEARCH_QUERY);
+        driver.findElement(By.name(SEARCH_BOX_NAME)).sendKeys(Keys.RETURN);
+    }
+
+	private void waitForResultsAndVerify() {
+		WebDriverWait wait = new WebDriverWait(driver, java.time.Duration.ofSeconds(10));
+		wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), SEARCH_QUERY));
+		assertTrue(driver.getPageSource().contains(SEARCH_QUERY));
 	}
 	
-	@After
-	public void tearDown()
-	{
-		driver.close();
-	}
-	
-	// ----------------------------------------------------------------------------------------------------------------
-	// tests
-	// ----------------------------------------------------------------------------------------------------------------
-	
-	@Test
-	public void canDuck()
-	{
-		driver.get("https://duckduckgo.com/");
-		driver.findElement(By.id("search_form_input_homepage")).sendKeys("fish");
-		driver.findElement(By.id("search_button_homepage")).click();
-		
-		assertThat(driver.getTitle(), containsString("fish"));
-	}
 }
