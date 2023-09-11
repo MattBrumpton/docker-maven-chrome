@@ -9,6 +9,6 @@ setup() {
 
 @test "Can run browser test" {
 	echo "Running browser test....."
-	docker run -d --rm --platform "${PLATFORM}" -it -v ${PWD}/test/test-project:/usr/src -w /usr/src $DOCKER_IMAGE /bin/bash
+	docker run -m=2g --rm -it -v ${PWD}/test/test-project:/usr/src -w /usr/src $DOCKER_IMAGE mvn clean install
 	echo "Browser test complete"
 }
