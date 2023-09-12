@@ -1,24 +1,17 @@
-FROM maven:3.9.2-eclipse-temurin-11
+FROM maven:3.9.4-eclipse-temurin-11
 
-# Google Chrome
+# Install latest Chrome
+RUN CHROME_URL=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels.Stable.downloads.chrome[] | select(.platform == "linux64") | .url') \
+    && curl -sSLf --retry 3 --output /tmp/chrome-linux64.zip "$CHROME_URL" \
+    && unzip /tmp/chrome-linux64.zip -d /opt \
+    && ln -s /opt/chrome-linux64/chrome /usr/local/bin/chrome \
+    && rm /tmp/chrome-linux64.zip
 
-ARG CHROME_VERSION=114.0.5735.90-1
-RUN apt-get update -qqy \
-	&& apt-get -qqy install gpg unzip \
-	&& wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-	&& echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
-	&& apt-get update -qqy \
-	&& apt-get -qqy install google-chrome-stable=$CHROME_VERSION \
-	&& rm /etc/apt/sources.list.d/google-chrome.list \
-	&& rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
-	&& sed -i 's/"$HERE\/chrome"/"$HERE\/chrome" --no-sandbox/g' /opt/google/chrome/google-chrome
+# Install latest chromedriver
+RUN CHROMEDRIVER_URL=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels.Stable.downloads.chromedriver[] | select(.platform == "linux64") | .url') \
+    && curl -sSLf --retry 3 --output /tmp/chromedriver-linux64.zip "$CHROMEDRIVER_URL" \
+    && unzip -o /tmp/chromedriver-linux64.zip -d /tmp \
+    && rm -rf /tmp/chromedriver-linux64.zip \
+    && mv -f /tmp/chromedriver-linux64/chromedriver "/usr/local/bin/chromedriver" \
+    && chmod +x "/usr/local/bin/chromedriver"
 
-# ChromeDriver
-
-ARG CHROME_DRIVER_VERSION=114.0.5735.90
-RUN wget -q -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip \
-	&& unzip /tmp/chromedriver.zip -d /opt \
-	&& rm /tmp/chromedriver.zip \
-	&& mv /opt/chromedriver /opt/chromedriver-$CHROME_DRIVER_VERSION \
-	&& chmod 755 /opt/chromedriver-$CHROME_DRIVER_VERSION \
-	&& ln -s /opt/chromedriver-$CHROME_DRIVER_VERSION /usr/bin/chromedriver
