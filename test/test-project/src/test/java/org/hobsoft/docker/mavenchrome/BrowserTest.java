@@ -49,9 +49,11 @@ public class BrowserTest {
             options.setCapability("goog:loggingPrefs", logs); // Added for logging
             options.addArguments("--headless=new");
             options.addArguments("--no-sandbox");
-            // options.addArguments("--disable-setuid-sandbox");
-            // options.addArguments("--remote-debugging-port=9222");
-            // options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--remote-allow-origins=*");
+            options.addArguments("--disable-setuid-sandbox");
+            //options.addArguments("--remote-debugging-port=9222");
+            options.addArguments("--disable-dev-shm-usage");
+
             // options.addArguments("--allowed-ips=127.0.0.1"); // Moved to last for better
             // visibility
 
